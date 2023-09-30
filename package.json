@@ -1,0 +1,21 @@
+{
+  "name": "root",
+  "private": true,
+  "scripts": {
+    "in:pkg": "run() { cd \"packages/$1\" && shift && npm run \"$@\" ; } ; run",
+    "all:pkg": "run() { for p in frontend backend ; do npm run in:pkg $p \"$@\" || exit 1 ; done ; } ; run",
+    "build": "npm run all:pkg build",
+    "serve": "npm-run-all -p serve:**",
+    "serve:frontend": "npm run serve -w packages/frontend",
+    "serve:backend": "npm run serve -w packages/backend",
+    "start": "npm run all:pkg start"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "devDependencies": {
+    "concurrently": "^7.5.0",
+    "npm-run-all": "^4.1.5"
+  },
+  "dependencies": {}
+}

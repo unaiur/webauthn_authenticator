@@ -1,0 +1,49 @@
+{
+  "name": "backend",
+  "private": true,
+  "scripts": {
+    "clean": "rimraf dist/bin dist/views dist/public",
+    "prebuild": "npm run clean",
+    "build": "cpx \"views/**\" dist/views && cpx \"../frontend/dist/**\" dist/public && eslint src && tsc",
+    "preserve": "npm run build",
+    "serve": "NODE_ENV=development npm-run-all -p \"serve:**\"",
+    "serve:views": "cpx \"views/**\" dist/views -w",
+    "serve:auth": "cpx \"../frontend/dist/**\" dist/public -w",
+    "serve:tsc": "tsc --watch",
+    "serve:code": "cd dist && nodemon -w bin -q bin/index.js",
+    "prestart": "npm run build",
+    "start": "cd dist && NODE_ENV=production node bin/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint src --fix"
+  },
+  "devDependencies": {
+    "@simplewebauthn/typescript-types": "^6.2.1",
+    "@tsconfig/node18": "^1.0.1",
+    "@types/better-sqlite3": "^7.6.2",
+    "@types/eslint": "^8.4.10",
+    "@types/express": "^4.17.14",
+    "@types/hbs": "^4.0.1",
+    "@types/jsonwebtoken": "^8.5.9",
+    "@types/morgan": "^1.9.3",
+    "@types/node": "^18.11.9",
+    "@typescript-eslint/eslint-plugin": "^5.42.0",
+    "@typescript-eslint/parser": "^5.42.1",
+    "cpx": "^1.5.0",
+    "eslint": "^8.27.0",
+    "nodemon": "^2.0.20",
+    "npm-run-all": "^4.1.5",
+    "rimraf": "^3.0.2",
+    "typescript": "^4.8.4"
+  },
+  "dependencies": {
+    "@simplewebauthn/server": "^6.2.2",
+    "better-sqlite3": "^7.6.2",
+    "express": "^4.18.2",
+    "hbs": "^4.2.0",
+    "helmet": "^4.6.0",
+    "jsonwebtoken": "^8.5.1",
+    "morgan": "^1.10.0",
+    "reflect-metadata": "^0.1.13",
+    "typeorm": "^0.3.10"
+  }
+}
