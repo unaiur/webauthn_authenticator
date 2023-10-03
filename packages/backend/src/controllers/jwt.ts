@@ -17,9 +17,7 @@ export function sendJwt(res: Response, user: User | null): Response {
   }
   const payload = {
     name: user.displayName,
-    roles: {
-      value: user.role,
-    },
+    roles: user.roles,
   }
   const algorithm = <Algorithm>JWT_ALGO
   const jwt = sign(payload, JWT_SECRET, {

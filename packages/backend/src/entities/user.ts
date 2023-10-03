@@ -5,7 +5,7 @@ export interface User {
   id: string;
   name: string;
   displayName: string;
-  role: Role;
+  roles: Role[];
   createdOn: Date;
   updatedOn: Date;
 }
@@ -27,10 +27,6 @@ export const UserEntity = new EntitySchema<User>({
       type: "varchar",
       length: 100,
     },
-    role: {
-      type: "simple-enum",
-      enum: Role,
-    },
     createdOn: {
       type: "datetime",
 
@@ -40,6 +36,13 @@ export const UserEntity = new EntitySchema<User>({
       type: "datetime",
       updateDate: true,
     },
+  },
+  relations: {
+    roles: {
+      type: "many-to-many",
+      target: "role",
+      joinTable: true,
+    }
   },
   indices: [
     {

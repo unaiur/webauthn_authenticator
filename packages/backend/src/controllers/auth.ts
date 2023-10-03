@@ -93,7 +93,10 @@ export function initializeAuth(app: Express) {
       return res.status(400).send({ message: "Credential not valid" })
     }
 
-    const userPromise = UserRepository.findOneBy({ id: authenticator.userId })
+    const userPromise = UserRepository.findOne({
+      where: { id: authenticator.userId },
+      relations: { roles: true },
+     })
     // Update the authenticator's counter in the DB to the newest count in the authentication
     await CredentialRepository.update(
       { credentialID },
