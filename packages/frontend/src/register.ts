@@ -17,7 +17,7 @@ function getDeviceName() {
   return `${browser.name} ${browser.version}`;
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", (async () => {
   // retrieve options
   try {
     const optionsResponse = await fetch(document.URL + "/options");
@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        credential: await startRegistration(options),
+        response: await startRegistration(options),
         displayName: getDeviceName(),
       }),
     });
@@ -50,4 +50,4 @@ document.addEventListener("DOMContentLoaded", async () => {
   } catch (err) {
     console.error(err);
   }
-});
+}) as EventListener);

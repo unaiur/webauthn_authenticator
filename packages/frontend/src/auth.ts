@@ -6,7 +6,7 @@ function appendFooter(text: string) {
   document.body.appendChild(footer);
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", (async () => {
   try {
     const optionsResponse = await fetch("options");
     const options = await optionsResponse.json();
@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        credential: await startAuthentication(options),
+        response: await startAuthentication(options),
         challengeValidator: options.challengeValidator
       }),
     });
@@ -36,4 +36,4 @@ document.addEventListener("DOMContentLoaded", async () => {
   } catch (err) {
     console.error(err);
   }
-});
+}) as EventListener);

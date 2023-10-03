@@ -11,25 +11,25 @@
     "lint": "eslint src --fix"
   },
   "devDependencies": {
-    "@simplewebauthn/typescript-types": "^6.2.1",
-    "@types/eslint": "^8.4.10",
-    "@types/ua-parser-js": "^0.7.36",
-    "@typescript-eslint/eslint-plugin": "^5.42.0",
-    "@typescript-eslint/parser": "^5.42.1",
-    "css-loader": "^6.7.1",
-    "eslint": "^8.27.0",
-    "html-webpack-plugin": "^5.5.0",
-    "nodemon": "^2.0.20",
-    "rimraf": "^3.0.2",
-    "style-loader": "^3.3.1",
-    "ts-loader": "^9.4.1",
-    "typescript": "^4.8.4",
-    "webpack": "^5.74.0",
-    "webpack-bundle-analyzer": "^4.7.0",
+    "@simplewebauthn/typescript-types": "^8.0.0",
+    "@types/eslint": "^8.44.3",
+    "@types/ua-parser-js": "^0.7.37",
+    "@typescript-eslint/eslint-plugin": "^6.7.3",
+    "@typescript-eslint/parser": "^6.7.3",
+    "css-loader": "^6.8.1",
+    "eslint": "^8.50.0",
+    "html-webpack-plugin": "^5.5.3",
+    "nodemon": "^3.0.1",
+    "rimraf": "^5.0.5",
+    "style-loader": "^3.3.3",
+    "ts-loader": "^9.4.4",
+    "typescript": "^5.2.2",
+    "webpack": "^5.88.2",
+    "webpack-bundle-analyzer": "^4.9.1",
     "webpack-cli": "^4.10.0"
   },
   "dependencies": {
-    "@simplewebauthn/browser": "^6.2.2",
-    "ua-parser-js": "^1.0.32"
+    "@simplewebauthn/browser": "^8.2.1",
+    "ua-parser-js": "^1.0.36"
   }
 }

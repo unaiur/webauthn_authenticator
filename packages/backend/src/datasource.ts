@@ -27,7 +27,7 @@ export function initializeDataSource() {
         displayName: "Administrator X",
         role: Role.ADMIN,
       });
-      const challenge = generateChallenge();
+      const challenge = await generateChallenge();
       const invitation = await InvitationRepository.save({ user, challenge });
       console.log(
         `Created new admin user. Please, register it using: ${PUBLIC_URL}register/${invitation.id}`

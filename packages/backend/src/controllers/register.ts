@@ -4,8 +4,8 @@ import {
   verifyRegistrationResponse,
   VerifyRegistrationResponseOpts,
 } from "@simplewebauthn/server"
-import { RegistrationCredentialJSON } from "@simplewebauthn/typescript-types"
-import { Express, Request, Response } from "express"
+import { RegistrationResponseJSON } from "@simplewebauthn/typescript-types"
+import { Express, Request, RequestHandler, Response } from "express"
 import { CredentialRepository, InvitationRepository } from "../datasource"
 import { isExpired } from "../entities/invitation"
 import { ORIGIN, RP_ID, RP_NAME } from "../settings"
@@ -18,7 +18,7 @@ export function initializeRegistry(app: Express) {
 
   app.get(
     "/register/:invitationId/options",
-    async (req: Request, res: Response) => {
+    (async (req: Request, res: Response) => {
       const invitation = await InvitationRepository.findOneBy({
         id: req.params.invitationId,
       })
@@ -31,7 +31,7 @@ export function initializeRegistry(app: Express) {
       const credentials = await CredentialRepository.findBy({
         userId: invitation.userId,
       })
-      const options = generateRegistrationOptions({
+      const options = await generateRegistrationOptions({
         rpName: RP_NAME,
         rpID: RP_ID,
         userID: invitation.user.id,
@@ -60,11 +60,11 @@ export function initializeRegistry(app: Express) {
       })
       res.send(options)
     }
-  )
+  ) as RequestHandler)
 
   app.post(
     "/register/:invitationId/verify",
-    async (req: Request, res: Response) => {
+    (async (req: Request, res: Response) => {
       const invitation = await InvitationRepository.findOneBy({
         id: req.params.invitationId,
       })
@@ -74,14 +74,14 @@ export function initializeRegistry(app: Express) {
           .send({message: "Registration invalid, not found or expired"})
       }
       const body: {
-        credential: RegistrationCredentialJSON
+        response: RegistrationResponseJSON
         displayName: string
       } = req.body
-      const { credential, displayName } = body
+      const { response, displayName } = body
       let verification: VerifiedRegistrationResponse
       try {
         const opts: VerifyRegistrationResponseOpts = {
-          credential,
+          response,
           expectedChallenge: invitation.challenge.toString("base64url"),
           expectedOrigin: ORIGIN,
           expectedRPID: RP_ID,
@@ -109,7 +109,7 @@ export function initializeRegistry(app: Express) {
         displayName: `${displayName}`,
         credentialPublicKey,
         counter,
-        transports: credential.transports,
+        transports: response.response.transports,
       })
       try {
         await CredentialRepository.insert(cred)
@@ -120,5 +120,5 @@ export function initializeRegistry(app: Express) {
       await InvitationRepository.delete(invitation.id)
       return sendJwt(res, invitation.user)
     }
-  )
+  ) as RequestHandler)
 }

@@ -1,5 +1,5 @@
 import { createHmac } from "crypto"
-import { Express, Request, Response } from "express"
+import { Express, Request, RequestHandler, Response } from "express"
 import {
   generateAuthenticationOptions,
   VerifiedAuthenticationResponse,
@@ -7,7 +7,7 @@ import {
   verifyAuthenticationResponse,
 } from "@simplewebauthn/server"
 import {
-  AuthenticationCredentialJSON,
+  AuthenticationResponseJSON
 } from "@simplewebauthn/typescript-types"
 import { RP_ID, RP_HMAC_ALGO, RP_HMAC_SECRET, ORIGIN } from "../settings"
 import { CredentialRepository, UserRepository } from "../datasource"
@@ -46,8 +46,8 @@ function validate(
 }
 
 export function initializeAuth(app: Express) {
-  app.get("/auth/options", (req: Request, res: Response) => {
-    const authenticationOptions = generateAuthenticationOptions({
+  app.get("/auth/options", (async (req: Request, res: Response) => {
+    const authenticationOptions = await generateAuthenticationOptions({
       timeout: 60000,
       userVerification: "required",
       rpID: RP_ID,
@@ -57,14 +57,14 @@ export function initializeAuth(app: Express) {
       ...authenticationOptions,
       challengeValidator,
     })
-  })
+  }) as RequestHandler)
 
-  app.post("/auth/verify", async (req: Request, res: Response) => {
+  app.post("/auth/verify", (async (req: Request, res: Response) => {
     const body: {
-      credential: AuthenticationCredentialJSON
-      challengeValidator: ChallengeValidator
+      response: AuthenticationResponseJSON,
+      challengeValidator: ChallengeValidator,
     } = req.body
-    const credentialID = Buffer.from(body.credential.rawId, "base64url")
+    const credentialID = Buffer.from(body.response.rawId, "base64url")
     const authenticator = await CredentialRepository.findOneBy({
       credentialID,
     })
@@ -74,7 +74,7 @@ export function initializeAuth(app: Express) {
     let verification: VerifiedAuthenticationResponse
     try {
       const opts: VerifyAuthenticationResponseOpts = {
-        credential: body.credential,
+        response: body.response,
         expectedChallenge: (c) => validate(c, body.challengeValidator),
         expectedOrigin: ORIGIN,
         expectedRPID: RP_ID,
@@ -100,5 +100,5 @@ export function initializeAuth(app: Express) {
       { counter: authenticationInfo.newCounter }
     )
     return sendJwt(res, await userPromise)
-  })
+  }) as RequestHandler)
 }
