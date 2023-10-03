@@ -10,7 +10,7 @@
     "serve:views": "cpx \"views/**\" dist/views -w",
     "serve:auth": "cpx \"../frontend/dist/**\" dist/public -w",
     "serve:tsc": "tsc --watch",
-    "serve:code": "cd dist && nodemon -w bin -q bin/index.js",
+    "serve:code": "cd dist && JWT_SECRET='012345678912' nodemon -w bin -q bin/index.js",
     "prestart": "npm run build",
     "start": "cd dist && NODE_ENV=production node bin/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",

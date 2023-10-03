@@ -7,6 +7,7 @@ import { initializeAuth } from "./controllers/auth"
 import { initializeRegistry } from "./controllers/register"
 import "reflect-metadata"
 import { initializeDataSource } from "./datasource"
+import { initializeAuthProxy } from "./controllers/authorize"
 
 const isDbReady = initializeDataSource()
 
@@ -35,14 +36,15 @@ initializeRegistry(app)
 app.get("/", (req: Request, res: Response) => {
   res.redirect(301, 'auth/')
 })
-app.get("*", (_, res: Response) => {
-  res.sendStatus(404)
-})
 
 
 isDbReady
-  .then(() => {
-    return app.listen({host: URL_HOST, port: URL_PORT}, () => console.log(`Running on ${URL_HOST}:${URL_PORT} ⚡`))
+  .then(async () => {
+    await initializeAuthProxy(app);
+    app.get("*", (_, res: Response) => {
+      res.sendStatus(404)
+    })
+    app.listen({host: URL_HOST, port: URL_PORT}, () => console.log(`Running on ${URL_HOST}:${URL_PORT} ⚡`))
   })
   .catch(error => {
     console.log(error)

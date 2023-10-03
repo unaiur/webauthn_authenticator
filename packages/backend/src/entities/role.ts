@@ -15,8 +15,7 @@ export const RoleEntity = new EntitySchema<Role>({
           length: 32,
       },
       display: {
-        type: "varchar",
-        length: 100,
+        type: "text"
       }
   },
 })
