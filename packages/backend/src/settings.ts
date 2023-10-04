@@ -1,7 +1,6 @@
 import { randomBytes } from "crypto"
 
 export const URL_PORT = parseInt(process.env["URL_PORT"] || "") || 8080
-export const URL_PATH = fixPath(process.env["URL_PATH"] || "")
 export const {
   URL_SCHEMA = "http",
   URL_HOST = "localhost",
@@ -19,14 +18,4 @@ export function isSecure() {
   return URL_SCHEMA == "https"
 }
 
-function fixPath(input: string) {
-  if (input) {
-    const prefix = input.startsWith('/') ? "" : "/"
-    const suffix = input.endsWith('/') ? "" : "/"
-    return prefix + input + suffix
-  }
-  return "/"
-}
-
 export const ORIGIN = `${URL_SCHEMA}://${URL_HOST}:${URL_PORT}`
-export const PUBLIC_URL = `${ORIGIN}${fixPath(URL_PATH)}`

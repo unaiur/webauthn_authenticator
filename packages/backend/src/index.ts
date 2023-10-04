@@ -2,7 +2,7 @@ import express, { Express, Request, Response } from "express"
 import helmet from "helmet"
 import morgan from "morgan"
 import hbs from "hbs"
-import { URL_HOST, URL_PATH, URL_PORT } from './settings'
+import { URL_HOST, URL_PORT } from './settings'
 import { initializeAuth } from "./controllers/auth"
 import { initializeRegistry } from "./controllers/register"
 import "reflect-metadata"
@@ -19,16 +19,6 @@ app.use(helmet())
 app.use(morgan('common'))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
-
-app.use((req, res, next) => {
-  if (req.url.startsWith(URL_PATH)) {
-    req.url = req.url.substring(URL_PATH.length - 1)
-    next()
-  } else {
-    res.status(404).send({message: "Requested resource was not found"})
-  }
-})
-
 app.use(express.static('public', {maxAge: 0}))
 
 initializeAuth(app)

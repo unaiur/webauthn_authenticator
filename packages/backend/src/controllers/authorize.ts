@@ -2,7 +2,6 @@ import { Express, Request, RequestHandler, Response } from "express"
 import { RuleRepository } from "../datasource";
 import { Action } from "../entities/action";
 import { Rule } from "../entities/rule";
-import { URL_PATH } from "../settings";
 import { DecodedJwt, decodeJwt, UNAUTHENTICATED_USER } from "./jwt";
 
 const REQUEST_URI_HDR = 'X-Forwarded-Uri'
@@ -51,7 +50,7 @@ export function evaluate(req: Request, res: Response): DecodedJwt | undefined {
     }
   }
   if (jwt === UNAUTHENTICATED_USER) {
-    res.redirect(URL_PATH + "auth/index.html")
+    res.redirect("/auth/index.html")
   } else {
     // TODO: write a proper error message!
     res.sendStatus(403);

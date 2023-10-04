@@ -3,7 +3,7 @@ import { CredentialEntity } from "./entities/credential";
 import { InvitationEntity } from "./entities/invitation";
 import { RoleEntity } from "./entities/role";
 import { UserEntity } from "./entities/user";
-import { PUBLIC_URL } from "./settings";
+import { ORIGIN } from "./settings";
 import { generateChallenge } from "@simplewebauthn/server/helpers";
 import { RuleEntity } from "./entities/rule";
 import { Action } from "./entities/action";
@@ -43,7 +43,7 @@ export function initializeDataSource() {
       const challenge = await generateChallenge();
       const invitation = await InvitationRepository.save({ user, challenge });
       console.log(
-        `Created new admin user. Please, register it using: ${PUBLIC_URL}register/${invitation.id}`
+        `Created new admin user. Please, register it using: ${ORIGIN}/register/${invitation.id}`
       );
 
       // Create a rule that allows everything to admins
