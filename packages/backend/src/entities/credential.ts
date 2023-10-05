@@ -1,6 +1,6 @@
 import { AuthenticatorTransportFuture } from "@simplewebauthn/typescript-types";
 import { EntitySchema } from "typeorm";
-import { User } from "./user";
+import { User } from "./user.js";
 
 export interface Credential {
   credentialID: Buffer;

@@ -1,16 +1,8 @@
 import { Request, Response } from "express"
-import { Algorithm, JwtPayload, sign, verify } from "jsonwebtoken"
-import { Role } from "../entities/role"
-import { User } from "../entities/user"
-import {
-  isSecure,
-  JWT_ALGO,
-  JWT_COOKIE,
-  JWT_EXPIRATION,
-  JWT_SECRET,
-  ORIGIN,
-  RP_ID,
-} from "../settings"
+import jsonwebtoken from "jsonwebtoken"
+import { Role } from "../entities/role.js"
+import { User } from "../entities/user.js"
+import { Settings } from "../data/settings.js"
 
 export const UNAUTHENTICATED_USER: DecodedJwt = {
   name: "nobody",
@@ -18,27 +10,31 @@ export const UNAUTHENTICATED_USER: DecodedJwt = {
   roles: []
 }
 
-export function sendJwt(res: Response, user: User | null): Response {
-  if (user == null) {
-    return res.status(500).send({ message: "user was deleted" })
-  }
+export function createJwt(user: User, settings: Settings): string {
   const payload = {
     name: user.displayName,
     roles: user.roles,
   }
-  const algorithm = <Algorithm>JWT_ALGO
-  const jwt = sign(payload, JWT_SECRET, {
+  const algorithm = settings.jwtAlgo as jsonwebtoken.Algorithm
+  return jsonwebtoken.sign(payload, settings.jwtSecret, {
     algorithm,
-    expiresIn: JWT_EXPIRATION,
-    audience: ORIGIN,
-    issuer: ORIGIN,
+    expiresIn: settings.jwtExpiration,
+    audience: settings.origin,
+    issuer: settings.origin,
     subject: user.name,
   })
+}
+
+export function sendJwt(res: Response, user: User | null, settings: Settings): Response {
+  if (user == null) {
+    return res.status(500).send({ message: "user was deleted" })
+  }
+  const jwt = createJwt(user, settings)
   const maxAge = 87400000
   const httpOnly = true
-  const secure = isSecure()
-  const domain = RP_ID
-  res.cookie(JWT_COOKIE, jwt, { maxAge, httpOnly, secure, domain })
+  const secure = settings.secure
+  const domain = settings.rpId
+  res.cookie(settings.jwtCookie, jwt, { maxAge, httpOnly, secure, domain })
   return res.send({ jwt })
 }
 
@@ -48,30 +44,31 @@ export type DecodedJwt = {
   roles: Role[]
 }
 
-export function decodeJwt(req: Request): DecodedJwt {
+export function decodeJwt(req: Request, settings: Settings): DecodedJwt {
   try {
-    const jwtCookie = getJwtCookie(req.headers["cookie"] || "")
-    const jwt = verify(jwtCookie, JWT_SECRET, {
-      algorithms: [<Algorithm>JWT_ALGO],
-      audience: ORIGIN,
-      issuer: ORIGIN,
-      maxAge: JWT_EXPIRATION,
-    }) as JwtPayload
+    const jwtCookie = getJwtCookie(req.headers["cookie"] ?? "", settings.jwtCookie)
+    if (!jwtCookie) return UNAUTHENTICATED_USER
+    const jwt = jsonwebtoken.verify(jwtCookie, settings.jwtSecret, {
+      algorithms: [settings.jwtAlgo as jsonwebtoken.Algorithm],
+      audience: settings.origin,
+      issuer: settings.origin,
+      maxAge: settings.jwtExpiration,
+    }) as jsonwebtoken.JwtPayload
     return {
       name: jwt.sub ?? "",
       displayName: jwt.name,
       roles: jwt.roles,
     }
   } catch(err) {
-    console.log(err)
+    console.info(err)
     return UNAUTHENTICATED_USER;
   }
 }
 
-function getJwtCookie(cookies: string): string {
+function getJwtCookie(cookies: string, name: string): string {
   const jwtCookie = cookies.split(';')
     .map(c => c.trim())
-    .filter(c => c.startsWith(JWT_COOKIE+'='))
-    .map(c => c.substring(JWT_COOKIE.length + 1))
+    .filter(c => c.startsWith(name+'='))
+    .map(c => c.substring(name.length + 1))
   return jwtCookie[0]
 }

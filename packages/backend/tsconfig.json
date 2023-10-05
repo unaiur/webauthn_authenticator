@@ -2,7 +2,9 @@
   "extends": "@tsconfig/node20/tsconfig.json",
   "compilerOptions": {
     "outDir": "dist/bin",
+    "module": "es2022",
+    "moduleResolution": "Node"
   },
-  "include": ["src"],
-  "exclude": ["node_modules"]
+  "include": ["src", "custom-types"],
+  "exclude": ["node_modules"],
 }

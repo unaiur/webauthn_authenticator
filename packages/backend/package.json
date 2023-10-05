@@ -1,19 +1,21 @@
 {
   "name": "backend",
+  "type": "module",
   "private": true,
   "scripts": {
     "clean": "rimraf dist/bin dist/views dist/public",
     "prebuild": "npm run clean",
     "build": "cpx \"views/**\" dist/views && cpx \"../frontend/dist/**\" dist/public && eslint src && tsc",
     "preserve": "npm run build",
-    "serve": "NODE_ENV=development npm-run-all -p \"serve:**\"",
+    "serve": "NODE_ENV=development DB_SYNC=true npm-run-all -p \"serve:**\"",
     "serve:views": "cpx \"views/**\" dist/views -w",
     "serve:auth": "cpx \"../frontend/dist/**\" dist/public -w",
     "serve:tsc": "tsc --watch",
     "serve:code": "cd dist && JWT_SECRET='012345678912' nodemon -w bin -q bin/index.js",
     "prestart": "npm run build",
     "start": "cd dist && NODE_ENV=production node bin/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
+    "t": "jest --watch",
     "lint": "eslint src --fix"
   },
   "devDependencies": {
@@ -26,6 +28,7 @@
     "@types/jsonwebtoken": "^9.0.3",
     "@types/morgan": "^1.9.3",
     "@types/node": "^20.8.0",
+    "@types/supertest": "^2.0.14",
     "@typescript-eslint/eslint-plugin": "^5.42.0",
     "@typescript-eslint/parser": "^6.7.3",
     "cpx2": "^5.0.0",
@@ -33,6 +36,10 @@
     "nodemon": "^3.0.1",
     "npm-run-all": "^4.1.5",
     "rimraf": "^5.0.5",
+    "supertest": "^6.3.3",
+    "tmp-promise": "^3.0.3",
+    "ts-jest-mocker": "^0.5.0",
+    "ts-node": "^10.9.1",
     "typescript": "^5.2.2"
   },
   "dependencies": {
@@ -47,4 +54,3 @@
     "typeorm": "^0.3.17"
   }
 }
-

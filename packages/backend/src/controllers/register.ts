@@ -6,12 +6,13 @@ import {
 } from "@simplewebauthn/server"
 import { RegistrationResponseJSON } from "@simplewebauthn/typescript-types"
 import { Express, Request, RequestHandler, Response } from "express"
-import { CredentialRepository, InvitationRepository } from "../datasource"
-import { isExpired } from "../entities/invitation"
-import { ORIGIN, RP_ID, RP_NAME } from "../settings"
-import { sendJwt } from "./jwt"
+import { Repository } from "typeorm"
+import { Credential } from "../entities/credential.js"
+import { Invitation, isExpired } from "../entities/invitation.js"
+import { Settings } from "../data/settings.js"
+import { sendJwt } from "./jwt.js"
 
-export function initializeRegistry(app: Express) {
+export function initializeRegistry(app: Express, settings: Settings, credentialRepo: Repository<Credential>, invitationRepo: Repository<Invitation>) {
   app.get("/register/:invitationId", (_, res) =>
     res.sendFile("register/index.html", { root: "public", maxAge: 0 })
   )
@@ -19,7 +20,7 @@ export function initializeRegistry(app: Express) {
   app.get(
     "/register/:invitationId/options",
     (async (req: Request, res: Response) => {
-      const invitation = await InvitationRepository.findOneBy({
+      const invitation = await invitationRepo.findOneBy({
         id: req.params.invitationId,
       })
       if (invitation == null || isExpired(invitation)) {
@@ -28,12 +29,12 @@ export function initializeRegistry(app: Express) {
           .send({message: "Registration invitation not found or expired"})
       }
 
-      const credentials = await CredentialRepository.findBy({
+      const credentials = await credentialRepo.findBy({
         userId: invitation.userId,
       })
       const options = await generateRegistrationOptions({
-        rpName: RP_NAME,
-        rpID: RP_ID,
+        rpName: settings.rpName,
+        rpID: settings.rpId,
         userID: invitation.user.id,
         userName: invitation.user.name,
         userDisplayName: invitation.user.displayName,
@@ -65,13 +66,13 @@ export function initializeRegistry(app: Express) {
   app.post(
     "/register/:invitationId/verify",
     (async (req: Request, res: Response) => {
-      const invitation = await InvitationRepository.findOneBy({
+      const invitation = await invitationRepo.findOneBy({
         id: req.params.invitationId,
       })
       if (invitation == null || isExpired(invitation)) {
         return res
           .status(400)
-          .send({message: "Registration invalid, not found or expired"})
+          .send({message: "Registration invitation not found or expired"})
       }
       const body: {
         response: RegistrationResponseJSON
@@ -83,8 +84,8 @@ export function initializeRegistry(app: Express) {
         const opts: VerifyRegistrationResponseOpts = {
           response,
           expectedChallenge: invitation.challenge.toString("base64url"),
-          expectedOrigin: ORIGIN,
-          expectedRPID: RP_ID,
+          expectedOrigin: settings.origin,
+          expectedRPID: settings.rpId,
           requireUserVerification: true,
         }
         verification = await verifyRegistrationResponse(opts)
@@ -92,18 +93,18 @@ export function initializeRegistry(app: Express) {
         console.error(error)
         return res
           .status(400)
-          .send({message: "Registration invalid, not found or expired"})
+          .send({message: "Registration invitation not found or expired"})
       }
 
       const { verified, registrationInfo } = verification
       if (!verified || !registrationInfo) {
         return res
           .status(400)
-          .send("Registration invalid, not found or expired")
+          .send({message: "Registration invitation not found or expired"})
       }
 
       const { credentialPublicKey, credentialID, counter } = registrationInfo
-      const cred = CredentialRepository.create({
+      const cred = credentialRepo.create({
         credentialID,
         user: invitation.user,
         displayName: `${displayName}`,
@@ -112,13 +113,13 @@ export function initializeRegistry(app: Express) {
         transports: response.response.transports,
       })
       try {
-        await CredentialRepository.insert(cred)
+        await credentialRepo.insert(cred)
+        await invitationRepo.delete(invitation.id)
       } catch (error) {
         console.error(error)
         return res.sendStatus(409)
       }
-      await InvitationRepository.delete(invitation.id)
-      return sendJwt(res, invitation.user)
+      return sendJwt(res, invitation.user, settings)
     }
   ) as RequestHandler)
 }

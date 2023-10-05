@@ -1,5 +1,5 @@
 import { EntitySchema } from "typeorm";
-import { Role } from "./role";
+import { Role } from "./role.js";
 
 export interface User {
   id: string;

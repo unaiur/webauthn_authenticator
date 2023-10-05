@@ -1,12 +1,12 @@
 import { EntitySchema } from "typeorm";
-import { Action } from "./action";
+import { Action } from "./action.js";
 
 export interface Rule {
   position: number,
   description?: string,
   hostRegex?: RegExp,
   pathRegex?: RegExp,
-  roles: string[],
+  roles?: string[],
   action: Action,
 }
 
@@ -32,16 +32,16 @@ export const RuleEntity = new EntitySchema<Rule>({
         type: "text",
         nullable: true,
         transformer: {
-          to: (value: string | null) => !!value ? new RegExp(value) : undefined,
-          from: (value: RegExp | undefined) => !!value ? value.source : null,
+          to: (value: string | null) => value ? new RegExp(value, 'i') : undefined,
+          from: (value: RegExp | undefined) => !value ? null : value.source,
         }
       },
       pathRegex: {
         type: "text",
         nullable: true,
         transformer: {
-          to: (value: string | null) => !!value ? new RegExp(value) : undefined,
-          from: (value: RegExp | undefined) => !!value ? value.source : null,
+          to: (value: string | null) => value ? new RegExp(value) : undefined,
+          from: (value: RegExp | undefined) => !value ? null : value.source,
         }
       },
   },

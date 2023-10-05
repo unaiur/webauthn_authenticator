@@ -2,14 +2,15 @@ import express, { Express, Request, Response } from "express"
 import helmet from "helmet"
 import morgan from "morgan"
 import hbs from "hbs"
-import { URL_HOST, URL_PORT } from './settings'
-import { initializeAuth } from "./controllers/auth"
-import { initializeRegistry } from "./controllers/register"
+import { loadSettings } from './data/settings.js'
+import { initializeAuth } from "./controllers/auth.js"
+import { initializeRegistry } from "./controllers/register.js"
 import "reflect-metadata"
-import { initializeDataSource } from "./datasource"
-import { initializeAuthProxy } from "./controllers/authorize"
+import { loadRepositories, Repositories } from "./data/repos.js"
+import { initializeAuthProxy } from "./controllers/authz.js"
 
-const isDbReady = initializeDataSource()
+const settings = loadSettings()
+const repositoriesPromise = loadRepositories(settings)
 
 hbs.registerHelper('json', JSON.stringify)
 
@@ -20,23 +21,23 @@ app.use(morgan('common'))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.static('public', {maxAge: 0}))
-
-initializeAuth(app)
-initializeRegistry(app)
 app.get("/", (req: Request, res: Response) => {
   res.redirect(301, 'auth/')
 })
 
-
-isDbReady
-  .then(async () => {
-    await initializeAuthProxy(app);
+repositoriesPromise
+  .then(async (repositories: Repositories) => {
+    initializeAuth(app, settings, repositories.credentials, repositories.users)
+    initializeRegistry(app, settings, repositories.credentials, repositories.invitations)
+    await initializeAuthProxy(app, settings, repositories.rules);
     app.get("*", (_, res: Response) => {
       res.sendStatus(404)
     })
-    app.listen({host: URL_HOST, port: URL_PORT}, () => console.log(`Running on ${URL_HOST}:${URL_PORT} ⚡`))
+    app.listen({host: settings.urlHost, port: settings.urlPort},
+      () => console.log(`Running on ${settings.urlHost}:${settings.urlPort} ⚡`))
   })
   .catch(error => {
     console.log(error)
+
     process.abort()
   })

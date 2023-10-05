@@ -1,29 +1,27 @@
-const path = require('path');
+import { join, resolve as _resolve } from 'path';
 
-module.exports = {
-  entry: {
-    main: {
-      import: path.join(__dirname, "src", "index.ts"),
-      filename: "bin/index.js",
+export const entry = {
+  main: {
+    import: join(__dirname, "src", "index.ts"),
+    filename: "bin/index.js",
+  },
+};
+export const mode = 'production';
+export const module = {
+  rules: [
+    {
+      test: /\.tsx?$/,
+      use: 'ts-loader',
+      exclude: /node_modules/,
     },
-  },
-  mode: 'production',
-  module: {
-    rules: [
-      {
-        test: /\.tsx?$/,
-        use: 'ts-loader',
-        exclude: /node_modules/,
-      },
-    ],
-  },
-  optimization: {
-    usedExports: true,
-  },
-  resolve: {
-    extensions: ['.tsx', '.ts', '.js'],
-  },
-  output: {
-    path: path.resolve(__dirname, 'dist'),
-  },
+  ],
+};
+export const optimization = {
+  usedExports: true,
+};
+export const resolve = {
+  extensions: ['.tsx', '.ts', '.js'],
+};
+export const output = {
+  path: _resolve(__dirname, 'dist'),
 };

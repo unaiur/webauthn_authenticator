@@ -9,9 +9,11 @@ import {
 import {
   AuthenticationResponseJSON
 } from "@simplewebauthn/typescript-types"
-import { RP_ID, RP_HMAC_ALGO, RP_HMAC_SECRET, ORIGIN } from "../settings"
-import { CredentialRepository, UserRepository } from "../datasource"
-import { sendJwt } from "./jwt"
+import { Settings } from "../data/settings.js"
+import { Credential } from "../entities/credential.js"
+import { User } from "../entities/user.js"
+import { sendJwt } from "./jwt.js"
+import { Repository } from "typeorm"
 
 export interface ChallengeValidator {
   timestamp: number
@@ -22,37 +24,38 @@ function now(): number {
   return Math.floor(Date.now() / 1000)
 }
 
-function getHmac(challenge: string, timestamp: number): string {
-  return createHmac(RP_HMAC_ALGO, RP_HMAC_SECRET)
+function getHmac(settings: Settings, challenge: string, timestamp: number): string {
+  return createHmac(settings.rpHmacAlgo, settings.rpHmacSecret)
     .update(`${timestamp}`)
     .update(challenge)
     .digest("base64url")
 }
 
-function buildValidator(challenge: string): ChallengeValidator {
+function buildValidator(settings: Settings, challenge: string): ChallengeValidator {
   const timestamp = now()
-  return { timestamp, hmac: getHmac(challenge, timestamp) }
+  return { timestamp, hmac: getHmac(settings, challenge, timestamp) }
 }
 
 function validate(
+  settings: Settings,
   challenge: string,
   validator: ChallengeValidator,
   maxAgeSeconds = 60
 ): boolean {
   return (
     now() - validator.timestamp <= maxAgeSeconds &&
-    getHmac(challenge, validator.timestamp) === validator.hmac
+    getHmac(settings, challenge, validator.timestamp) === validator.hmac
   )
 }
 
-export function initializeAuth(app: Express) {
+export function initializeAuth(app: Express, settings: Settings, credentialRepo: Repository<Credential>, userRepo: Repository<User>) {
   app.get("/auth/options", (async (req: Request, res: Response) => {
     const authenticationOptions = await generateAuthenticationOptions({
       timeout: 60000,
       userVerification: "required",
-      rpID: RP_ID,
+      rpID: settings.rpId,
     })
-    const challengeValidator = buildValidator(authenticationOptions.challenge)
+    const challengeValidator = buildValidator(settings, authenticationOptions.challenge)
     return res.send({
       ...authenticationOptions,
       challengeValidator,
@@ -65,7 +68,7 @@ export function initializeAuth(app: Express) {
       challengeValidator: ChallengeValidator,
     } = req.body
     const credentialID = Buffer.from(body.response.rawId, "base64url")
-    const authenticator = await CredentialRepository.findOneBy({
+    const authenticator = await credentialRepo.findOneBy({
       credentialID,
     })
     if (authenticator == null) {
@@ -75,9 +78,9 @@ export function initializeAuth(app: Express) {
     try {
       const opts: VerifyAuthenticationResponseOpts = {
         response: body.response,
-        expectedChallenge: (c) => validate(c, body.challengeValidator),
-        expectedOrigin: ORIGIN,
-        expectedRPID: RP_ID,
+        expectedChallenge: (c) => validate(settings, c, body.challengeValidator),
+        expectedOrigin: settings.origin,
+        expectedRPID: settings.rpId,
         authenticator,
         requireUserVerification: true,
       }
@@ -93,15 +96,28 @@ export function initializeAuth(app: Express) {
       return res.status(400).send({ message: "Credential not valid" })
     }
 
-    const userPromise = UserRepository.findOne({
+    const userPromise = userRepo.findOne({
       where: { id: authenticator.userId },
       relations: { roles: true },
      })
+
     // Update the authenticator's counter in the DB to the newest count in the authentication
-    await CredentialRepository.update(
-      { credentialID },
-      { counter: authenticationInfo.newCounter }
-    )
-    return sendJwt(res, await userPromise)
+    try {
+      await credentialRepo.update(
+        { credentialID },
+        { counter: authenticationInfo.newCounter }
+      )
+    } catch (error) {
+        console.error(error)
+        return res.sendStatus(409)
+    }
+
+    const user = await userPromise
+    if (user == null) {
+      console.warn("Unverified credential")
+      return res.status(404).send({ message: "User not found" })
+    }
+
+    return sendJwt(res, user, settings)
   }) as RequestHandler)
 }
