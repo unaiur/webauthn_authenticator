@@ -4,7 +4,14 @@ import { Action } from "../entities/action.js";
 import { Rule } from "../entities/rule.js";
 import { Settings } from "../data/settings.js";
 import { DecodedJwt, decodeJwt, UNAUTHENTICATED_USER } from "./jwt.js";
+import { getAuditService } from "../services/audit.js"
 
+const DEFAULT_RULE: Rule = {
+  id: 'DEFAULT',
+  name: 'DefaultRule',
+  position: Number.MAX_VALUE,
+  action: Action.DENY
+}
 let rules: Rule[] = []
 
 export async function initializeAuthProxy(app: Express, settings: Settings, ruleRepo: Repository<Rule>) {
@@ -48,16 +55,14 @@ export function evaluate(req: Request, res: Response, settings: Settings): Decod
   const {host, path} = parseUrl(req, settings)
   for (const rule of rules) {
     if (matches(rule, host, path, roles)) {
+      getAuditService().authorizated(host, path, jwt, rule)
       if (rule.action === Action.ALLOW) {
-        // TODO: proper audit
-        console.log(`Rule#${rule.position} ALLOWS ${jwt.name}`)
         return jwt;
       }
-      console.log(`Rule#${rule.position} DENIES ${jwt.name}`)
       break;
     }
   }
-  console.log(`Rule#DEFAULT DENIES ${jwt.name}`)
+  getAuditService().authorizated(host, path, jwt, DEFAULT_RULE)
   if (jwt === UNAUTHENTICATED_USER) {
     res.redirect("/auth/index.html")
   } else {

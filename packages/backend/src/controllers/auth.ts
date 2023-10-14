@@ -14,6 +14,7 @@ import { Credential } from "../entities/credential.js"
 import { User } from "../entities/user.js"
 import { sendJwt } from "./jwt.js"
 import { Repository } from "typeorm"
+import { getAuditService } from "../services/audit.js"
 
 export interface ChallengeValidator {
   timestamp: number
@@ -71,7 +72,7 @@ export function initializeAuth(app: Express, settings: Settings, credentialRepo:
     const authenticator = await credentialRepo.findOneBy({
       credentialID,
     })
-    if (authenticator == null) {
+    if (authenticator === null) {
       return res.status(404).send({ message: "Credential not found" })
     }
     let verification: VerifiedAuthenticationResponse
@@ -118,6 +119,7 @@ export function initializeAuth(app: Express, settings: Settings, credentialRepo:
       return res.status(404).send({ message: "User not found" })
     }
 
+    getAuditService().authenticated(user, authenticator)
     return sendJwt(res, user, settings)
   }) as RequestHandler)
 }

@@ -3,6 +3,8 @@ import { Action } from "./action.js";
 
 export interface Rule {
   position: number,
+  id: string,
+  name: string,
   description?: string,
   hostRegex?: RegExp,
   pathRegex?: RegExp,
@@ -13,9 +15,19 @@ export interface Rule {
 export const RuleEntity = new EntitySchema<Rule>({
   name: "rule",
   columns: {
-      position: {
+      id: {
         primary: true,
+        generated: "uuid",
+        type: "uuid",
+      },
+      position: {
+        unique: true,
         type: "int",
+      },
+      name: {
+        type: "varchar",
+        unique: true,
+        length: 64,
       },
       description: {
         type: "text",

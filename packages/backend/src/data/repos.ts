@@ -55,6 +55,7 @@ export async function loadRepositories(settings: Settings): Promise<Repositories
     // Create a rule that allows everything to admins
     await rules.save(rules.create({
       position: 1,
+      name: "EverythingAllowedForAdmins",
       description: "Administrators can access all pages",
       action: Action.ALLOW,
       roles: ["admin"]

@@ -10,6 +10,7 @@ import { User } from '../../entities/user.js'
 import { Role } from '../../entities/role.js'
 import { Rule } from '../../entities/rule.js'
 import { Action } from '../../entities/action.js'
+import { randomUUID } from 'crypto'
 
 jest.mock('typeorm')
 
@@ -18,28 +19,39 @@ describe('authorize', () => {
     const origSettings = {...settings}
     const rules: Rule[] = [
         {
+            id: randomUUID(),
+            name: 'AdminPathAllowedForAdmin',
+            description: 'Only admins can access /admin/*',
             position: 0,
             pathRegex: /^\/admin\//,
             roles: ['admin'],
             action: Action.ALLOW
         },
         {
+            id: randomUUID(),
+            name: 'AdminPathDeniedForAnybodyElse',
             position: 10,
             pathRegex: /^\/admin\//,
             action: Action.DENY
         },
         {
+            id: randomUUID(),
+            name: 'AuthzEndpointAllowedForAll',
             position: 11,
             hostRegex: /^127.0.0.1:[0-9]*$/,
             pathRegex: /^\/authz$/,
             action: Action.ALLOW
         },
         {
+            id: randomUUID(),
+            name: 'PublicDomainAllowedForAll',
             position: 20,
             hostRegex: /^public\./,
             action: Action.ALLOW
         },
         {
+            id: randomUUID(),
+            name: 'MyServiceUserPathAllowedForUsers',
             position: 30,
             hostRegex: /^myservice\./,
             pathRegex: /^\/user\//,
@@ -47,6 +59,8 @@ describe('authorize', () => {
             action: Action.ALLOW
         },
         {
+            id: randomUUID(),
+            name: 'EverythingAllowedForAdmins',
             position: 40,
             roles: ['admin'],
             action: Action.ALLOW

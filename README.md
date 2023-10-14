@@ -8,9 +8,9 @@ Webauthn Relaying Party for HomeLab Authentication
 <h2>Roadmap</h2>
 <h3>1.0</h3>
  * ~~Extensive Unit Tests~~
- * Auditing
- * Documentation
+ * ~~Auditing~~
  * Continous Integration
+ * Documentation
 <h3>1.1</h3>
  * Admin UI:
    - add, update and delete roles and users
