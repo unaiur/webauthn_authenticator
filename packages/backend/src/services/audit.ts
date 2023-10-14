@@ -26,7 +26,7 @@ const myCustomLevels = {
 };
 winston.addColors(myCustomLevels.colors);
 
-const myFormat = winston.format.printf(({ level, message, label, timestamp }) => {
+const myFormat = winston.format.printf(({ level, message, _label, timestamp }) => {
     return `${timestamp} ${level} ${message}`;
 });
 
