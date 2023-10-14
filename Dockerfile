@@ -1,20 +1,22 @@
 # --------------> The build image
-FROM node:18-alpine3.16 AS modules
+FROM node:20.8-alpine3.18 AS modules
 WORKDIR /usr/src/app
 ENV NODE_ENV production
-RUN apk update && apk add dumb-init
-COPY packages/backend/package*.json /usr/src/app/
-RUN npm ci --only=production
+RUN apk update && apk --no-cache add dumb-init
+COPY package*.json /usr/src/app/
+COPY packages/backend/package.json /usr/src/app/packages/backend/
+RUN npm ci --omit=dev
 
 # --------------> Compile the code
-FROM node:18-alpine3.16 AS code
+FROM --platform=$BUILDPLATFORM node:20.8-alpine3.18 AS code
 WORKDIR /usr/src/app
-COPY . /usr/src/app/
+COPY package-lock.json package.json /usr/src/app/
+COPY packages /usr/src/app/packages
 RUN rm -rf packages/backend/dist
-RUN npm install && npm run build
+RUN npm install && npm run build && npm run test
 
 # --------------> The production image
-FROM node:18-alpine3.16
+FROM node:20.8-alpine3.18
 WORKDIR /usr/src/app
 ENV NODE_ENV production
 COPY --from=modules /usr/bin/dumb-init /usr/bin/dumb-init
