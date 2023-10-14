@@ -7,7 +7,7 @@
     "build": "eslint src && webpack",
     "serve": "NODE_ENV=development webpack watch --mode=development --devtool=inline-source-map",
     "start": "npm run build",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "echo \"Warning: no tests specified\"",
     "lint": "eslint src --fix"
   },
   "devDependencies": {

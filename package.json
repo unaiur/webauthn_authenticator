@@ -8,6 +8,7 @@
     "serve": "npm-run-all -p serve:**",
     "serve:frontend": "npm run serve -w packages/frontend",
     "serve:backend": "npm run serve -w packages/backend",
+    "test": "npm run all:pkg test",
     "start": "npm run all:pkg start"
   },
   "workspaces": [
