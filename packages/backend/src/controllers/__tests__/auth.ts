@@ -9,6 +9,7 @@ import { loadSettings } from '../../data/settings.js'
 import { Credential } from '../../entities/credential.js'
 import { User } from '../../entities/user.js'
 import { Role } from '../../entities/role.js'
+import { AuditService } from '../../data/audit.js'
 
 jest.mock('typeorm')
 
@@ -18,8 +19,9 @@ describe('authenticate', () => {
     const app: Express = express()
     const mockedCredentialRepo = mock<Repository<Credential>>();
     const mockedUserRepo = mock<Repository<User>>();
+    const mockedAuditService = mock<AuditService>();
     app.use(express.json())
-    initializeAuth(app, settings, mockedCredentialRepo, mockedUserRepo)
+    initializeAuth(app, settings, mockedAuditService, mockedCredentialRepo, mockedUserRepo)
     const req = request(app)
     const adminRole: Role = {
         value: 'admin',

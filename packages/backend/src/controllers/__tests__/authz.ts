@@ -11,6 +11,7 @@ import { Role } from '../../entities/role.js'
 import { Rule } from '../../entities/rule.js'
 import { Action } from '../../entities/action.js'
 import { randomUUID } from 'crypto'
+import { AuditService } from '../../data/audit.js'
 
 jest.mock('typeorm')
 
@@ -70,9 +71,10 @@ describe('authorize', () => {
     const app: Express = express()
     app.use(express.json())
 
+    const mockedAuditService = mock<AuditService>();
     const mockedRuleRepo = mock<Repository<Rule>>();
     mockedRuleRepo.find.mockResolvedValue(Promise.resolve(rules))
-    initializeAuthProxy(app, settings, mockedRuleRepo)
+    initializeAuthProxy(app, settings, mockedAuditService, mockedRuleRepo)
 
     const adminRole: Role = {
         value: 'admin',

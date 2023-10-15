@@ -8,8 +8,10 @@ import { initializeRegistry } from "./controllers/register.js"
 import "reflect-metadata"
 import { loadRepositories, Repositories } from "./data/repos.js"
 import { initializeAuthProxy } from "./controllers/authz.js"
+import { createAuditService } from "./data/audit.js"
 
 const settings = loadSettings()
+const auditService = createAuditService(settings)
 const repositoriesPromise = loadRepositories(settings)
 
 hbs.registerHelper('json', JSON.stringify)
@@ -27,9 +29,9 @@ app.get("/", (req: Request, res: Response) => {
 
 repositoriesPromise
   .then(async (repositories: Repositories) => {
-    initializeAuth(app, settings, repositories.credentials, repositories.users)
-    initializeRegistry(app, settings, repositories.credentials, repositories.invitations)
-    await initializeAuthProxy(app, settings, repositories.rules);
+    initializeAuth(app, settings, auditService, repositories.credentials, repositories.users)
+    initializeRegistry(app, settings, auditService, repositories.credentials, repositories.invitations)
+    await initializeAuthProxy(app, settings, auditService, repositories.rules);
     app.get("*", (_, res: Response) => {
       res.sendStatus(404)
     })

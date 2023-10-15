@@ -14,7 +14,7 @@ import { Credential } from "../entities/credential.js"
 import { User } from "../entities/user.js"
 import { sendJwt } from "./jwt.js"
 import { Repository } from "typeorm"
-import { getAuditService } from "../services/audit.js"
+import { AuditService } from "../data/audit.js"
 
 export interface ChallengeValidator {
   timestamp: number
@@ -49,7 +49,7 @@ function validate(
   )
 }
 
-export function initializeAuth(app: Express, settings: Settings, credentialRepo: Repository<Credential>, userRepo: Repository<User>) {
+export function initializeAuth(app: Express, settings: Settings, auditService: AuditService, credentialRepo: Repository<Credential>, userRepo: Repository<User>) {
   app.get("/auth/options", (async (req: Request, res: Response) => {
     const authenticationOptions = await generateAuthenticationOptions({
       timeout: 60000,
@@ -119,7 +119,7 @@ export function initializeAuth(app: Express, settings: Settings, credentialRepo:
       return res.status(404).send({ message: "User not found" })
     }
 
-    getAuditService().authenticated(user, authenticator)
+    auditService.authenticated(user, authenticator)
     return sendJwt(res, user, settings)
   }) as RequestHandler)
 }

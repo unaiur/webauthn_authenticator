@@ -11,6 +11,7 @@ import { User } from '../../entities/user.js'
 import { PublicKeyCredentialCreationOptionsJSON, RegistrationResponseJSON } from '@simplewebauthn/typescript-types'
 import { generateChallenge } from '@simplewebauthn/server/helpers'
 import * as SimpleWebAuthnServer from "@simplewebauthn/server"
+import { AuditService } from '../../data/audit.js'
 
 jest.mock('typeorm')
 
@@ -18,10 +19,11 @@ describe('register', () => {
     const settings = loadSettings();
 
     const app: Express = express()
+    const mockedAuditService = mock<AuditService>();
     const mockedCredentialRepo = mock<Repository<Credential>>();
     const mockedInvitationRepo = mock<Repository<Invitation>>();
     app.use(express.json())
-    initializeRegistry(app, settings, mockedCredentialRepo, mockedInvitationRepo)
+    initializeRegistry(app, settings, mockedAuditService, mockedCredentialRepo, mockedInvitationRepo)
     const req = request(app)
     const user: User = {
         id: '33b1913e-4b74-4959-8e41-1b3d887d8517',

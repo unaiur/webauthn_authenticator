@@ -21,6 +21,7 @@ export interface Settings {
   userNameHttpHeader: string
   userDisplayNameHttpHeader: string
   userRolesHttpHeader: string
+  auditPath: string
 }
 
 function getOriginUrl(schema: string, host: string, port: number): string {
@@ -53,6 +54,7 @@ export function loadSettings(): Settings {
     forwardedUriHttpHeader: process.env["FORWARDED_URI_HTTP_HEADER"] || 'X-Forwarded-Uri',
     userNameHttpHeader: process.env["USER_NAME_HTTP_HEADER"] ||  'X-Forwarded-For-Name',
     userDisplayNameHttpHeader: process.env["USER_DISPLAY_NAME_HTTP_HEADER"] || 'X-Forwarded-For-Display-Name',
-    userRolesHttpHeader: process.env["USER_ROLES_HTTP_HEADER"] || 'X-Forwarded-For-Roles'
+    userRolesHttpHeader: process.env["USER_ROLES_HTTP_HEADER"] || 'X-Forwarded-For-Roles',
+    auditPath: process.env["AUDIT_PATH"] || 'log/audit.log'
   };
 }

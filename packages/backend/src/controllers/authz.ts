@@ -4,7 +4,7 @@ import { Action } from "../entities/action.js";
 import { Rule } from "../entities/rule.js";
 import { Settings } from "../data/settings.js";
 import { DecodedJwt, decodeJwt, UNAUTHENTICATED_USER } from "./jwt.js";
-import { getAuditService } from "../services/audit.js"
+import { AuditService } from "../data/audit.js"
 
 const DEFAULT_RULE: Rule = {
   id: 'DEFAULT',
@@ -14,7 +14,7 @@ const DEFAULT_RULE: Rule = {
 }
 let rules: Rule[] = []
 
-export async function initializeAuthProxy(app: Express, settings: Settings, ruleRepo: Repository<Rule>) {
+export async function initializeAuthProxy(app: Express, settings: Settings, auditService: AuditService, ruleRepo: Repository<Rule>) {
   await reloadRules();
 
   async function reloadRules() {
@@ -25,7 +25,7 @@ export async function initializeAuthProxy(app: Express, settings: Settings, rule
   }
 
   app.get("/authz", (req: Request, res: Response) => {
-    const jwt = evaluate(req, res, settings);
+    const jwt = evaluate(req, res, settings, auditService);
     if (jwt) {
       if (!!settings.userNameHttpHeader) {
         res.set(settings.userNameHttpHeader, jwt.name)
@@ -41,7 +41,7 @@ export async function initializeAuthProxy(app: Express, settings: Settings, rule
   })
 
   app.get("/authz/reload", (async (req: Request, res: Response) => {
-    const jwt = evaluate(req, res, settings);
+    const jwt = evaluate(req, res, settings, auditService);
     if (jwt) {
       await reloadRules();
       res.sendStatus(204);
@@ -49,20 +49,20 @@ export async function initializeAuthProxy(app: Express, settings: Settings, rule
   }) as RequestHandler);
 }
 
-export function evaluate(req: Request, res: Response, settings: Settings): DecodedJwt | undefined {
+export function evaluate(req: Request, res: Response, settings: Settings, auditService: AuditService): DecodedJwt | undefined {
   const jwt = decodeJwt(req, settings);
   const roles = new Set(jwt?.roles?.map(r => r.value) ?? []);
   const {host, path} = parseUrl(req, settings)
   for (const rule of rules) {
     if (matches(rule, host, path, roles)) {
-      getAuditService().authorizated(host, path, jwt, rule)
+      auditService.authorizated(host, path, jwt, rule)
       if (rule.action === Action.ALLOW) {
         return jwt;
       }
       break;
     }
   }
-  getAuditService().authorizated(host, path, jwt, DEFAULT_RULE)
+  auditService.authorizated(host, path, jwt, DEFAULT_RULE)
   if (jwt === UNAUTHENTICATED_USER) {
     res.redirect(settings.origin + "/auth/index.html")
   } else {

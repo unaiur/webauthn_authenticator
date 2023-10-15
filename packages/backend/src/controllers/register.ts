@@ -11,9 +11,9 @@ import { Credential } from "../entities/credential.js"
 import { Invitation, isExpired } from "../entities/invitation.js"
 import { Settings } from "../data/settings.js"
 import { sendJwt } from "./jwt.js"
-import { getAuditService } from "../services/audit.js"
+import { AuditService } from "../data/audit.js"
 
-export function initializeRegistry(app: Express, settings: Settings, credentialRepo: Repository<Credential>, invitationRepo: Repository<Invitation>) {
+export function initializeRegistry(app: Express, settings: Settings, auditService: AuditService, credentialRepo: Repository<Credential>, invitationRepo: Repository<Invitation>) {
   app.get("/register/:invitationId", (_, res) =>
     res.sendFile("register/index.html", { root: "public", maxAge: 0 })
   )
@@ -120,7 +120,7 @@ export function initializeRegistry(app: Express, settings: Settings, credentialR
         console.error(error)
         return res.sendStatus(409)
       }
-      getAuditService().registered(invitation, cred)
+      auditService.registered(invitation, cred)
       return sendJwt(res, invitation.user, settings)
     }
   ) as RequestHandler)
