@@ -37,7 +37,7 @@ describe('register', () => {
         id: '6331d656-a3bb-4af4-a6b3-bf1f217c5b8',
         user,
         userId: 'f9ffa256-aeb1-4c3b-bb4d-14a46e94cdd0',
-        createdOn: new Date(),
+        createdOn: new Date(new Date().getTime() - 55000),
         durationSecs: 600,
         challenge: Buffer.from('CF311D53324B8CBB22829DB78D6E1506D564EF2FDC2F9DF764581E420B07ACA1', 'hex')
     }

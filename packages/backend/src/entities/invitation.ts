@@ -13,7 +13,7 @@ export interface Invitation {
 export function isExpired(invitation: Invitation): boolean {
     const now = new Date().getTime()
     const createdOn = invitation.createdOn.getTime()
-    return createdOn - now > 0 || createdOn + invitation.durationSecs - now < 0
+    return createdOn - now > 0 || createdOn + invitation.durationSecs * 1000 - now < 0
 }
 
 export const InvitationEntity = new EntitySchema<Invitation>({

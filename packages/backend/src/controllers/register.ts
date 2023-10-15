@@ -71,6 +71,9 @@ export function initializeRegistry(app: Express, settings: Settings, auditServic
         id: req.params.invitationId,
       })
       if (invitation == null || isExpired(invitation)) {
+        if (invitation) {
+          console.warn(`Invitation ${req.params.invitationId} expired`)
+        }
         return res
           .status(400)
           .send({message: "Registration invitation not found or expired"})
@@ -99,6 +102,7 @@ export function initializeRegistry(app: Express, settings: Settings, auditServic
 
       const { verified, registrationInfo } = verification
       if (!verified || !registrationInfo) {
+        console.log(`Unable to verify invitation ${invitation.id} registration`)
         return res
           .status(400)
           .send({message: "Registration invitation not found or expired"})
