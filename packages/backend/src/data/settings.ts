@@ -48,7 +48,7 @@ export function loadSettings(): Settings {
     dbPath: process.env['DB_PATH'] ?? "data/auth.db",
     dbSync: process.env['DB_SYNC'] === 'true',
     secure: urlSchema === "https",
-    origin: getOriginUrl(urlSchema, urlHost, urlPort),
+    origin: process.env['ORIGIN'] || getOriginUrl(urlSchema, urlHost, urlPort),
     verbose: process.env["VERBOSE"] === 'true',
     forwardedUriHttpHeader: process.env["FORWARDED_URI_HTTP_HEADER"] || 'X-Forwarded-Uri',
     userNameHttpHeader: process.env["USER_NAME_HTTP_HEADER"] ||  'X-Forwarded-For-Name',
