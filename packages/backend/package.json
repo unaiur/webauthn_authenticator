@@ -5,7 +5,7 @@
   "scripts": {
     "clean": "rimraf dist/bin dist/views dist/public",
     "prebuild": "npm run clean",
-    "build": "cpx \"views/**\" dist/views && cpx \"../frontend/dist/**\" dist/public && eslint src && tsc",
+    "build": "cpx \"views/**\" dist/views && cpx \"../frontend/dist/**\" dist/public && eslint src && tsc && echo '{\"type\": \"module\"}' > dist/bin/package.json",
     "preserve": "npm run build",
     "serve": "NODE_ENV=development DB_SYNC=true npm-run-all -p \"serve:**\"",
     "serve:views": "cpx \"views/**\" dist/views -w",
