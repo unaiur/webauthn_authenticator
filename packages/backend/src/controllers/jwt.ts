@@ -19,8 +19,8 @@ export function createJwt(user: User, settings: Settings): string {
   return jsonwebtoken.sign(payload, settings.jwtSecret, {
     algorithm,
     expiresIn: settings.jwtExpiration,
-    audience: settings.origin,
-    issuer: settings.origin,
+    audience: settings.publicAuthUrl,
+    issuer: settings.publicAuthUrl,
     subject: user.name,
   })
 }
@@ -50,8 +50,8 @@ export function decodeJwt(req: Request, settings: Settings): DecodedJwt {
     if (!jwtCookie) return UNAUTHENTICATED_USER
     const jwt = jsonwebtoken.verify(jwtCookie, settings.jwtSecret, {
       algorithms: [settings.jwtAlgo as jsonwebtoken.Algorithm],
-      audience: settings.origin,
-      issuer: settings.origin,
+      audience: settings.publicAuthUrl,
+      issuer: settings.publicAuthUrl,
       maxAge: settings.jwtExpiration,
     }) as jsonwebtoken.JwtPayload
     return {

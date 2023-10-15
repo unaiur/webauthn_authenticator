@@ -88,7 +88,7 @@ export function initializeRegistry(app: Express, settings: Settings, auditServic
         const opts: VerifyRegistrationResponseOpts = {
           response,
           expectedChallenge: invitation.challenge.toString("base64url"),
-          expectedOrigin: settings.origin,
+          expectedOrigin: settings.publicAuthUrl,
           expectedRPID: settings.rpId,
           requireUserVerification: true,
         }

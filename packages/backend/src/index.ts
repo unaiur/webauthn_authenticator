@@ -35,8 +35,8 @@ repositoriesPromise
     app.get("*", (_, res: Response) => {
       res.sendStatus(404)
     })
-    app.listen({host: settings.urlHost, port: settings.urlPort},
-      () => console.log(`Running on ${settings.urlHost}:${settings.urlPort} ⚡`))
+    app.listen({host: settings.listeningAddress, port: settings.listeningPort},
+      () => console.log(`Running on ${settings.listeningAddress}:${settings.listeningPort} ⚡`))
   })
   .catch(error => {
     console.log(error)

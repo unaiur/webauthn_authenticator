@@ -15,8 +15,10 @@ describe('Settings', () => {
 
     test('it must load defaults', () => {
         const settings = loadSettings()
-        expect(settings.urlHost).toBe('localhost')
-        expect(settings.urlPort).toBe(8080)
+        expect(settings.listeningAddress).toBeUndefined()
+        expect(settings.listeningPort).toBe(8080)
+        expect(settings.publicAuthUrl).toBe('http://localhost:8080')
+        expect(settings.secure).toBe(false)
         expect(settings.rpId).toBe('localhost')
         expect(settings.rpName).toBe('localhost')
         expect(settings.rpHmacAlgo).toBe('sha256')
@@ -27,15 +29,13 @@ describe('Settings', () => {
         expect(settings.jwtSecret).toHaveLength(16)
         expect(settings.dbPath).toBe('data/auth.db')
         expect(settings.dbSync).toBe(false)
-        expect(settings.secure).toBe(false)
-        expect(settings.origin).toBe('http://localhost:8080')
         expect(settings.verbose).toBe(false)
     })
 
     test('it must load overrides', () => {
-        process.env.ORIGIN = 'https://auth.test.org'
-        process.env.URL_HOST = 'internal-host-name'
-        process.env.URL_PORT = '80'
+        process.env.PUBLIC_AUTH_URL = 'https://auth.test.org'
+        process.env.LISTENING_ADDRESS = '127.0.0.1'
+        process.env.LISTENING_PORT = '80'
         process.env.RP_ID = 'test.org'
         process.env.RP_NAME = 'My Test Org'
         process.env.RP_HMAC_ALGO = 'sha512'
@@ -49,8 +49,10 @@ describe('Settings', () => {
         process.env.VERBOSE = 'true'
 
         const settings = loadSettings()
-        expect(settings.urlHost).toBe('internal-host-name')
-        expect(settings.urlPort).toBe(80)
+        expect(settings.listeningAddress).toBe('127.0.0.1')
+        expect(settings.listeningPort).toBe(80)
+        expect(settings.publicAuthUrl).toBe('https://auth.test.org')
+        expect(settings.secure).toBe(true)
         expect(settings.rpId).toBe('test.org')
         expect(settings.rpName).toBe('My Test Org')
         expect(settings.rpHmacAlgo).toBe('sha512')
@@ -61,8 +63,6 @@ describe('Settings', () => {
         expect(settings.jwtSecret).toBe('0123456789abcdef')
         expect(settings.dbPath).toBe('data/test.db')
         expect(settings.dbSync).toBe(true)
-        expect(settings.secure).toBe(true)
-        expect(settings.origin).toBe('https://auth.test.org')
         expect(settings.verbose).toBe(true)
     })
 
@@ -71,16 +71,8 @@ describe('Settings', () => {
 
         const settings = loadSettings()
 
-        expect(settings.urlHost).toBe('localhost')
+        expect(settings.listeningAddress).toBeUndefined()
         expect(settings.rpId).toBe('test.org')
         expect(settings.rpName).toBe('test.org')
-    })
-
-    test('it must omit standard HTTP port in origin', () => {
-        process.env.URL_PORT = '80'
-
-        const settings = loadSettings()
-
-        expect(settings.origin).toBe('http://localhost')
     })
 })

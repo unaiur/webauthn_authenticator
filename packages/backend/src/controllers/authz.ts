@@ -64,7 +64,7 @@ export function evaluate(req: Request, res: Response, settings: Settings, auditS
   }
   auditService.authorizated(host, path, jwt, DEFAULT_RULE)
   if (jwt === UNAUTHENTICATED_USER) {
-    res.redirect(settings.origin + "/auth/index.html")
+    res.redirect(settings.publicAuthUrl + "/auth/index.html")
   } else {
     // TODO: write a proper error message!
     res.sendStatus(403);

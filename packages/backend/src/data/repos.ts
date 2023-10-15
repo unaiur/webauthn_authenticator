@@ -49,7 +49,7 @@ export async function loadRepositories(settings: Settings): Promise<Repositories
     const challenge = await generateChallenge();
     const invitation = await invitations.save({ user, challenge });
     console.log(
-      `Created new admin user. Please, register it using: ${settings.origin}/register/${invitation.id}`
+      `Created new admin user. Please, register it using: ${settings.publicAuthUrl}/register/${invitation.id}`
     );
 
     // Create a rule that allows everything to admins

@@ -80,7 +80,7 @@ export function initializeAuth(app: Express, settings: Settings, auditService: A
       const opts: VerifyAuthenticationResponseOpts = {
         response: body.response,
         expectedChallenge: (c) => validate(settings, c, body.challengeValidator),
-        expectedOrigin: settings.origin,
+        expectedOrigin: settings.publicAuthUrl,
         expectedRPID: settings.rpId,
         authenticator,
         requireUserVerification: true,

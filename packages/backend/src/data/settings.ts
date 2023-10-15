@@ -1,8 +1,10 @@
 import { randomBytes } from "crypto"
 
 export interface Settings {
-  urlPort: number
-  urlHost: string
+  listeningPort: number
+  listeningAddress: string | undefined
+  publicAuthUrl: string
+  secure: boolean
   rpId: string
   rpName: string
   rpHmacAlgo: string
@@ -13,8 +15,6 @@ export interface Settings {
   jwtSecret: string
   dbPath: string
   dbSync: boolean
-  secure: boolean
-  origin: string
   verbose: boolean
   forwardedUriHttpHeader: string
   userNameHttpHeader: string
@@ -23,36 +23,31 @@ export interface Settings {
   auditPath: string
 }
 
-function getOriginUrl(schema: string, host: string, port: number): string {
-  const portStr = (schema === "http" && port == 80) || (schema === "https" && port == 443) ? "" : `:${port}`;
-  return `${schema}://${host}${portStr}`
-}
-
 export function loadSettings(): Settings {
-  const urlHost = process.env.URL_HOST ?? "localhost"
-  const urlPort = parseInt(process.env.URL_PORT ?? "0") || 8080
-  const origin = process.env['ORIGIN'] || getOriginUrl("http", urlHost, urlPort)
-  const rpId = process.env.RP_ID ?? urlHost
+  const listeningAddress = process.env.LISTENING_ADDRESS
+  const listeningPort = parseInt(process.env.LISTENING_PORT ?? "0") || 8080
+  const publicAuthUrl = process.env.PUBLIC_AUTH_URL || `http://localhost:${listeningPort}`
+  const rpId = process.env.RP_ID ?? "localhost"
   return {
-    urlHost,
-    urlPort,
+    listeningAddress,
+    listeningPort,
     rpId,
     rpName: process.env.RP_NAME ?? rpId,
     rpHmacAlgo: process.env.RP_HMAC_ALGO ?? "sha256",
     rpHmacSecret: process.env.RP_HMAC_SECRET ?? randomBytes(12).toString('base64url'),
-    jwtAlgo: process.env['JWT_ALGO'] ?? "HS256",
-    jwtCookie: process.env['JWT_COOKIE'] ?? "x-auth-jwt",
-    jwtExpiration: process.env['JWT_EXPIRATION'] ?? "1d",
-    jwtSecret: process.env['JWT_SECRET'] ?? randomBytes(12).toString('base64'),
-    dbPath: process.env['DB_PATH'] ?? "data/auth.db",
-    dbSync: process.env['DB_SYNC'] === 'true',
-    secure: origin.startsWith("https:"),
-    origin,
-    verbose: process.env["VERBOSE"] === 'true',
-    forwardedUriHttpHeader: process.env["FORWARDED_URI_HTTP_HEADER"] || 'X-Forwarded-Uri',
-    userNameHttpHeader: process.env["USER_NAME_HTTP_HEADER"] ||  'X-Forwarded-For-Name',
-    userDisplayNameHttpHeader: process.env["USER_DISPLAY_NAME_HTTP_HEADER"] || 'X-Forwarded-For-Display-Name',
-    userRolesHttpHeader: process.env["USER_ROLES_HTTP_HEADER"] || 'X-Forwarded-For-Roles',
-    auditPath: process.env["AUDIT_PATH"] || 'log/audit.log'
+    jwtAlgo: process.env.JWT_ALGO ?? "HS256",
+    jwtCookie: process.env.JWT_COOKIE ?? "x-auth-jwt",
+    jwtExpiration: process.env.JWT_EXPIRATION ?? "1d",
+    jwtSecret: process.env.JWT_SECRET ?? randomBytes(12).toString('base64'),
+    dbPath: process.env.DB_PATH ?? "data/auth.db",
+    dbSync: process.env.DB_SYNC === 'true',
+    secure: publicAuthUrl.startsWith("https:"),
+    publicAuthUrl: publicAuthUrl,
+    verbose: process.env.VERBOSE === 'true',
+    forwardedUriHttpHeader: process.env.FORWARDED_URI_HTTP_HEADER || 'X-Forwarded-Uri',
+    userNameHttpHeader: process.env.USER_NAME_HTTP_HEADER ||  'X-Forwarded-For-Name',
+    userDisplayNameHttpHeader: process.env.USER_DISPLAY_NAME_HTTP_HEADER || 'X-Forwarded-For-Display-Name',
+    userRolesHttpHeader: process.env.USER_ROLES_HTTP_HEADER || 'X-Forwarded-For-Roles',
+    auditPath: process.env.AUDIT_PATH || 'log/audit.log'
   };
 }
