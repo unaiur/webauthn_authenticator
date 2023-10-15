@@ -158,7 +158,7 @@ describe('authorize', () => {
 
         // assert
         expect(response.statusCode).toBe(302)
-        expect(response.get('location')).toEqual('/auth/index.html')
+        expect(response.get('location')).toEqual(settings.origin + '/auth/index.html')
         expect(response.get(settings.userNameHttpHeader)).toBeUndefined()
         expect(response.get(settings.userDisplayNameHttpHeader)).toBeUndefined()
         expect(response.get(settings.userRolesHttpHeader)).toBeUndefined()
