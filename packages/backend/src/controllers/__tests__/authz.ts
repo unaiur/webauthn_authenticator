@@ -116,7 +116,8 @@ describe('authorize', () => {
         const response = await req
             .get('/authz')
             .set('Cookie', [`${settings.jwtCookie}=${jwt}`])
-            .set(settings.forwardedUriHttpHeader, 'http://admin.example.org/admin/users')
+            .set(settings.forwardedHostHttpHeader, 'admin.example.org')
+            .set(settings.forwardedUriHttpHeader, '/admin/users')
             .send()
 
         // assert
@@ -138,7 +139,8 @@ describe('authorize', () => {
         const response = await req
             .get('/authz')
             .set('Cookie', [`${settings.jwtCookie}=${jwt}`])
-            .set(settings.forwardedUriHttpHeader, 'http://admin.example.org/admin/users')
+            .set(settings.forwardedHostHttpHeader, 'admin.example.org')
+            .set(settings.forwardedUriHttpHeader, '/admin/users')
             .send()
 
         // assert
@@ -155,7 +157,8 @@ describe('authorize', () => {
         // act
         const response = await req
             .get('/authz')
-            .set(settings.forwardedUriHttpHeader, 'http://example.org/items')
+            .set(settings.forwardedHostHttpHeader, 'example.org')
+            .set(settings.forwardedUriHttpHeader, '/items')
             .send()
 
         // assert
@@ -173,7 +176,8 @@ describe('authorize', () => {
         // act
         const response = await req
             .get('/authz')
-            .set(settings.forwardedUriHttpHeader, 'http://public.example.org/items')
+            .set(settings.forwardedHostHttpHeader, 'public.example.org')
+            .set(settings.forwardedUriHttpHeader, '/items')
             .send()
 
         // assert
@@ -192,7 +196,8 @@ describe('authorize', () => {
         const response = await req
             .get('/authz')
             .set('Cookie', [`${settings.jwtCookie}=${jwt}`])
-            .set(settings.forwardedUriHttpHeader, 'http://example.org/admin/users')
+            .set(settings.forwardedHostHttpHeader, 'example.org')
+            .set(settings.forwardedUriHttpHeader, '/admin/users')
             .send()
 
         // assert
@@ -227,7 +232,8 @@ describe('authorize', () => {
         const response = await req
             .get('/authz')
             .set('Cookie', [`${settings.jwtCookie}=${jwt}`])
-            .set(settings.forwardedUriHttpHeader, 'http://myservice.example.org/user/')
+            .set(settings.forwardedHostHttpHeader, 'myservice.example.org')
+            .set(settings.forwardedUriHttpHeader, '/user/')
             .send()
 
         // assert

@@ -73,12 +73,9 @@ export function evaluate(req: Request, res: Response, settings: Settings, auditS
 }
 
 function parseUrl(req: Request, settings: Settings): {host: string, path: string} {
-  const header = req.get(settings.forwardedUriHttpHeader)
-  if (header) {
-    const url = new URL(header)
-    return {host: url.hostname, path: url.pathname}
-  }
-  return {host: req.get('host') as string, path: req.originalUrl}
+  const host = req.get(settings.forwardedHostHttpHeader) || req.get('host') || 'unknown'
+  const path = req.get(settings.forwardedUriHttpHeader) || req.originalUrl
+  return {host, path}
 }
 
 function matches(rule: Rule, host: string, path: string, roles: Set<string>): boolean {

@@ -55,7 +55,7 @@ export function createAuditService(settings: Settings) {
             console.info('authenticated')
         },
         registered(invitation: Invitation, credential: Credential): void {
-            auditLogger.log('registered', `user ${invitation.user.name} created credential ${credential.displayName} [${credential.credentialID}] using invitation ${invitation.id}`)
+            auditLogger.log('registered', `user ${invitation.user.name} created credential ${credential.displayName} [${credential.credentialID.toString('base64url')}] using invitation ${invitation.id}`)
             console.info('registered')
         }
     }

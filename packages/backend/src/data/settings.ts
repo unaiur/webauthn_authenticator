@@ -16,6 +16,7 @@ export interface Settings {
   dbPath: string
   dbSync: boolean
   verbose: boolean
+  forwardedHostHttpHeader: string
   forwardedUriHttpHeader: string
   userNameHttpHeader: string
   userDisplayNameHttpHeader: string
@@ -44,10 +45,11 @@ export function loadSettings(): Settings {
     secure: publicAuthUrl.startsWith("https:"),
     publicAuthUrl: publicAuthUrl,
     verbose: process.env.VERBOSE === 'true',
+    forwardedHostHttpHeader: process.env.FORWARDED_HOST_HTTP_HEADER || 'X-Forwarded-Host',
     forwardedUriHttpHeader: process.env.FORWARDED_URI_HTTP_HEADER || 'X-Forwarded-Uri',
-    userNameHttpHeader: process.env.USER_NAME_HTTP_HEADER ||  'X-Forwarded-For-Name',
-    userDisplayNameHttpHeader: process.env.USER_DISPLAY_NAME_HTTP_HEADER || 'X-Forwarded-For-Display-Name',
-    userRolesHttpHeader: process.env.USER_ROLES_HTTP_HEADER || 'X-Forwarded-For-Roles',
+    userNameHttpHeader: process.env.USER_NAME_HTTP_HEADER ||  'X-Forwarded-User-Name',
+    userDisplayNameHttpHeader: process.env.USER_DISPLAY_NAME_HTTP_HEADER || 'X-Forwarded-User-Display-Name',
+    userRolesHttpHeader: process.env.USER_ROLES_HTTP_HEADER || 'X-Forwarded-User-Roles',
     auditPath: process.env.AUDIT_PATH || 'log/audit.log'
   };
 }
