@@ -1,7 +1,6 @@
 import { randomBytes } from "crypto"
 
 export interface Settings {
-  urlSchema: string
   urlPort: number
   urlHost: string
   rpId: string
@@ -30,12 +29,11 @@ function getOriginUrl(schema: string, host: string, port: number): string {
 }
 
 export function loadSettings(): Settings {
-  const urlSchema = process.env.URL_SCHEMA ?? "http"
   const urlHost = process.env.URL_HOST ?? "localhost"
   const urlPort = parseInt(process.env.URL_PORT ?? "0") || 8080
+  const origin = process.env['ORIGIN'] || getOriginUrl("http", urlHost, urlPort)
   const rpId = process.env.RP_ID ?? urlHost
   return {
-    urlSchema,
     urlHost,
     urlPort,
     rpId,
@@ -48,8 +46,8 @@ export function loadSettings(): Settings {
     jwtSecret: process.env['JWT_SECRET'] ?? randomBytes(12).toString('base64'),
     dbPath: process.env['DB_PATH'] ?? "data/auth.db",
     dbSync: process.env['DB_SYNC'] === 'true',
-    secure: urlSchema === "https",
-    origin: process.env['ORIGIN'] || getOriginUrl(urlSchema, urlHost, urlPort),
+    secure: origin.startsWith("https:"),
+    origin,
     verbose: process.env["VERBOSE"] === 'true',
     forwardedUriHttpHeader: process.env["FORWARDED_URI_HTTP_HEADER"] || 'X-Forwarded-Uri',
     userNameHttpHeader: process.env["USER_NAME_HTTP_HEADER"] ||  'X-Forwarded-For-Name',

@@ -15,7 +15,6 @@ describe('Settings', () => {
 
     test('it must load defaults', () => {
         const settings = loadSettings()
-        expect(settings.urlSchema).toBe('http')
         expect(settings.urlHost).toBe('localhost')
         expect(settings.urlPort).toBe(8080)
         expect(settings.rpId).toBe('localhost')
@@ -34,9 +33,9 @@ describe('Settings', () => {
     })
 
     test('it must load overrides', () => {
-        process.env.URL_SCHEMA = 'https'
-        process.env.URL_HOST = 'auth.test.org'
-        process.env.URL_PORT = '443'
+        process.env.ORIGIN = 'https://auth.test.org'
+        process.env.URL_HOST = 'internal-host-name'
+        process.env.URL_PORT = '80'
         process.env.RP_ID = 'test.org'
         process.env.RP_NAME = 'My Test Org'
         process.env.RP_HMAC_ALGO = 'sha512'
@@ -50,9 +49,8 @@ describe('Settings', () => {
         process.env.VERBOSE = 'true'
 
         const settings = loadSettings()
-        expect(settings.urlSchema).toBe('https')
-        expect(settings.urlHost).toBe('auth.test.org')
-        expect(settings.urlPort).toBe(443)
+        expect(settings.urlHost).toBe('internal-host-name')
+        expect(settings.urlPort).toBe(80)
         expect(settings.rpId).toBe('test.org')
         expect(settings.rpName).toBe('My Test Org')
         expect(settings.rpHmacAlgo).toBe('sha512')
