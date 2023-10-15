@@ -1,11 +1,11 @@
-import { DecodedJwt } from "../controllers/jwt"
-import { Credential } from "../entities/credential"
-import { Invitation } from "../entities/invitation"
-import { Rule } from "../entities/rule"
-import { User } from "../entities/user"
+import { DecodedJwt } from "../controllers/jwt.js"
+import { Credential } from "../entities/credential.js"
+import { Invitation } from "../entities/invitation.js"
+import { Rule } from "../entities/rule.js"
+import { User } from "../entities/user.js"
 import * as winston from "winston"
-import { Action } from "../entities/action"
-import { Settings } from "./settings"
+import { Action } from "../entities/action.js"
+import { Settings } from "./settings.js"
 
 export interface AuditService {
    authorizated(host: string, path: string, decodedJwt: DecodedJwt, rule: Rule): void
