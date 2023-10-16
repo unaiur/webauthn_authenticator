@@ -16,6 +16,7 @@ export interface Settings {
   dbPath: string
   dbSync: boolean
   verbose: boolean
+  forwardedSchemeHttpHeader: string
   forwardedHostHttpHeader: string
   forwardedUriHttpHeader: string
   userNameHttpHeader: string
@@ -45,6 +46,7 @@ export function loadSettings(): Settings {
     secure: publicAuthUrl.startsWith("https:"),
     publicAuthUrl: publicAuthUrl,
     verbose: process.env.VERBOSE === 'true',
+    forwardedSchemeHttpHeader: process.env.FORWARDED_SCHEME_HTTP_HEADER || 'X-Forwarded-Proto',
     forwardedHostHttpHeader: process.env.FORWARDED_HOST_HTTP_HEADER || 'X-Forwarded-Host',
     forwardedUriHttpHeader: process.env.FORWARDED_URI_HTTP_HEADER || 'X-Forwarded-Uri',
     userNameHttpHeader: process.env.USER_NAME_HTTP_HEADER ||  'X-Forwarded-User-Name',

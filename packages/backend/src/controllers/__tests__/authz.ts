@@ -39,8 +39,8 @@ describe('authorize', () => {
             id: randomUUID(),
             name: 'AuthzEndpointAllowedForAll',
             position: 11,
-            hostRegex: /^127.0.0.1:[0-9]*$/,
-            pathRegex: /^\/authz$/,
+            hostRegex: /^unknown$/,
+            pathRegex: /^\/$/,
             action: Action.ALLOW
         },
         {
@@ -163,7 +163,7 @@ describe('authorize', () => {
 
         // assert
         expect(response.statusCode).toBe(302)
-        expect(response.get('location')).toEqual(settings.publicAuthUrl + '/auth/index.html')
+        expect(response.get('location')).toEqual(settings.publicAuthUrl + '/auth/index.html?u=http%3A%2F%2Fexample.org%2Fitems')
         expect(response.get(settings.userNameHttpHeader)).toBeUndefined()
         expect(response.get(settings.userDisplayNameHttpHeader)).toBeUndefined()
         expect(response.get(settings.userRolesHttpHeader)).toBeUndefined()
@@ -207,7 +207,7 @@ describe('authorize', () => {
         expect(response.get(settings.userRolesHttpHeader)).toBeUndefined()
     })
 
-    test('it should use request host and path if the forwarded URI header is not present in the http request', async () => {
+    test('it should use unknown host and path if the forwarded URI header is not present in the http request', async () => {
         // arrange
         const req = request(app)
 

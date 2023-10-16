@@ -8,7 +8,7 @@ import { Action } from "../entities/action.js"
 import { Settings } from "./settings.js"
 
 export interface AuditService {
-   authorizated(host: string, path: string, decodedJwt: DecodedJwt, rule: Rule): void
+   authorizated(url: URL, decodedJwt: DecodedJwt, rule: Rule): void
    authenticated(user: User, credential: Credential): void
    registered(invitation: Invitation, credential: Credential): void
 }
@@ -45,9 +45,9 @@ export function createAuditService(settings: Settings) {
 
 
     const auditService: AuditService = {
-        authorizated(host: string, path: string, decodedJwt: DecodedJwt, rule: Rule): void {
+        authorizated(url: URL, decodedJwt: DecodedJwt, rule: Rule): void {
             const level = rule.action === Action.ALLOW ? 'allow' : 'deny'
-            auditLogger.log(level, `user ${decodedJwt.name} to ${host}${path} by rule ${rule.name} [${rule.id}]`)
+            auditLogger.log(level, `user ${decodedJwt.name} to ${url} by rule ${rule.name} [${rule.id}]`)
             console.info('authorized')
         },
         authenticated(user: User, credential: Credential): void {

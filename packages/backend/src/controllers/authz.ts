@@ -25,7 +25,7 @@ export async function initializeAuthProxy(app: Express, settings: Settings, audi
   }
 
   app.get("/authz", (req: Request, res: Response) => {
-    const jwt = evaluate(req, res, settings, auditService);
+    const jwt = evaluate({req, res, settings, url: parseForwardedUrl(req, settings), auditService});
     if (jwt) {
       if (!!settings.userNameHttpHeader) {
         res.set(settings.userNameHttpHeader, jwt.name)
@@ -41,7 +41,7 @@ export async function initializeAuthProxy(app: Express, settings: Settings, audi
   })
 
   app.get("/authz/reload", (async (req: Request, res: Response) => {
-    const jwt = evaluate(req, res, settings, auditService);
+    const jwt = evaluate({req, res, settings, auditService});
     if (jwt) {
       await reloadRules();
       res.sendStatus(204);
@@ -49,22 +49,22 @@ export async function initializeAuthProxy(app: Express, settings: Settings, audi
   }) as RequestHandler);
 }
 
-export function evaluate(req: Request, res: Response, settings: Settings, auditService: AuditService): DecodedJwt | undefined {
+export function evaluate({req, res, settings, url = parseHostedUrl(req, settings), auditService}:
+    {req: Request, res: Response, settings: Settings, url?: URL, auditService: AuditService}): DecodedJwt | undefined {
   const jwt = decodeJwt(req, settings);
   const roles = new Set(jwt?.roles?.map(r => r.value) ?? []);
-  const {host, path} = parseUrl(req, settings)
   for (const rule of rules) {
-    if (matches(rule, host, path, roles)) {
-      auditService.authorizated(host, path, jwt, rule)
+    if (matches(rule, url, roles)) {
+      auditService.authorizated(url, jwt, rule)
       if (rule.action === Action.ALLOW) {
         return jwt;
       }
       break;
     }
   }
-  auditService.authorizated(host, path, jwt, DEFAULT_RULE)
+  auditService.authorizated(url, jwt, DEFAULT_RULE)
   if (jwt === UNAUTHENTICATED_USER) {
-    res.redirect(settings.publicAuthUrl + "/auth/index.html")
+    res.redirect(settings.publicAuthUrl + `/auth/index.html?u=${encodeURIComponent(url.toString())}`)
   } else {
     // TODO: write a proper error message!
     res.sendStatus(403);
@@ -72,15 +72,20 @@ export function evaluate(req: Request, res: Response, settings: Settings, auditS
   return undefined;
 }
 
-function parseUrl(req: Request, settings: Settings): {host: string, path: string} {
-  const host = req.get(settings.forwardedHostHttpHeader) || req.get('host') || 'unknown'
-  const path = req.get(settings.forwardedUriHttpHeader) || req.originalUrl
-  return {host, path}
+function parseHostedUrl(req: Request, settings: Settings): URL {
+  return new URL(req.originalUrl, settings.publicAuthUrl)
 }
 
-function matches(rule: Rule, host: string, path: string, roles: Set<string>): boolean {
-  const hostMatches = (!rule.hostRegex || rule.hostRegex.test(host));
-  const pathMatches = (!rule.pathRegex || rule.pathRegex.test(path));
+function parseForwardedUrl(req: Request, settings: Settings): URL {
+  const scheme = req.get(settings.forwardedSchemeHttpHeader) || 'http'
+  const host = req.get(settings.forwardedHostHttpHeader) || 'unknown'
+  const uri = req.get(settings.forwardedUriHttpHeader) || '/'
+  return new URL(uri, `${scheme}://${host}`)
+}
+
+function matches(rule: Rule, url: URL, roles: Set<string>): boolean {
+  const hostMatches = (!rule.hostRegex || rule.hostRegex.test(url.host));
+  const pathMatches = (!rule.pathRegex || rule.pathRegex.test(url.pathname));
   const rolesMatches = (!rule.roles || !!rule.roles.find(r => roles.has(r)));
   return hostMatches && pathMatches && rolesMatches;
 }

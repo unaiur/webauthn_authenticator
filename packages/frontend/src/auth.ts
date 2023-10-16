@@ -29,10 +29,15 @@ document.addEventListener("DOMContentLoaded", (async () => {
     });
     const auth = await authResponse.json();
     if (!authResponse.ok) {
-      return appendFooter(`Authentication error: ${JSON.stringify(auth)}`);
+      appendFooter(`Authentication error: ${JSON.stringify(auth)}`)
+    } else {
+      const redirectUrl = new URLSearchParams(window.location.search).get('u')
+      if (!!redirectUrl) {
+        window.location.href = redirectUrl
+      } else {
+        appendFooter(`JWT: ${auth.jwt}`)
+      }
     }
-
-    return appendFooter(`JWT: ${auth.jwt}`);
   } catch (err) {
     console.error(err);
   }
