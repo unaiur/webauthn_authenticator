@@ -5,13 +5,12 @@
   "scripts": {
     "clean": "rimraf dist/bin dist/views dist/public",
     "prebuild": "npm run clean",
-    "build": "cpx \"views/**\" dist/views && cpx \"../frontend/dist/**\" dist/public && eslint src && tsc && echo '{\"type\": \"module\"}' > dist/bin/package.json",
+    "build": "eslint src && tsup && cpx \"views/**\" dist/views && cpx \"../frontend/dist/**\" dist/public",
     "preserve": "npm run build",
     "serve": "NODE_ENV=development DB_SYNC=true npm-run-all -p \"serve:**\"",
     "serve:views": "cpx \"views/**\" dist/views -w",
     "serve:auth": "cpx \"../frontend/dist/**\" dist/public -w",
-    "serve:tsc": "tsc --watch",
-    "serve:code": "cd dist && JWT_SECRET='012345678912' nodemon -w bin -q bin/index.js",
+    "serve:tsup": "tsup --watch --onSuccess 'cd dist && JWT_SECRET='012345678912' bin/app.cjs'",
     "prestart": "npm run build",
     "start": "cd dist && NODE_ENV=production node bin/index.js",
     "test": "jest",
@@ -33,13 +32,13 @@
     "@typescript-eslint/parser": "^6.7.5",
     "cpx2": "^5.0.0",
     "eslint": "^8.50.0",
-    "nodemon": "^3.0.1",
     "npm-run-all": "^4.1.5",
     "rimraf": "^5.0.5",
     "supertest": "^6.3.3",
     "tmp-promise": "^3.0.3",
     "ts-jest-mocker": "^0.5.0",
     "ts-node": "^10.9.1",
+    "tsup": "^7.2.0",
     "typescript": "^5.2.2"
   },
   "dependencies": {
@@ -50,7 +49,6 @@
     "helmet": "^7.0.0",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
-    "reflect-metadata": "^0.1.13",
     "typeorm": "^0.3.17",
     "winston": "^3.11.0"
   }

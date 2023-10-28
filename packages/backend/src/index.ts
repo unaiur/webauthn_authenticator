@@ -1,3 +1,5 @@
+#! /usr/bin/env node
+
 import express, { Express, Request, Response } from "express"
 import helmet from "helmet"
 import morgan from "morgan"
