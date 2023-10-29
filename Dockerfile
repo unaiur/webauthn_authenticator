@@ -3,9 +3,11 @@ FROM node:20.8-alpine3.18 AS modules
 WORKDIR /usr/src/app
 ENV NODE_ENV=production
 RUN apk update && apk --no-cache add dumb-init
-COPY package*.json /usr/src/app/
-COPY packages/backend/package.json /usr/src/app/packages/backend/
-RUN npm ci --omit=dev
+COPY package-lock.json /usr/src/app/
+COPY packages/backend/package.json /usr/src/app
+RUN npm ci --omit=dev --omit=optional
+# Remove sqlite3 C source code that is no longer needed
+RUN rm -rf node_modules/better-sqlite3/src node_modules/better-sqlite3/deps
 
 # --------------> Compile the code
 FROM --platform=$BUILDPLATFORM node:20.8-alpine3.18 AS code
