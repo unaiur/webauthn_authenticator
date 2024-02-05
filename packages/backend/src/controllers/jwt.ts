@@ -34,7 +34,7 @@ export function sendJwt(res: Response, user: User | null, settings: Settings): R
   const httpOnly = true
   const secure = settings.secure
   const domain = settings.rpId
-  res.cookie(settings.jwtCookie, jwt, { maxAge, httpOnly, secure, domain })
+  res.cookie(settings.jwtCookie, jwt, { maxAge, httpOnly, secure, domain, sameSite: "strict" })
   return res.send({ jwt })
 }
 

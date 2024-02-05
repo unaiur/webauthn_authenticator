@@ -170,7 +170,7 @@ describe('register', () => {
         // Assert
         expect(verifyResponse.statusCode).toBe(200)
         expect(verifyResponse.headers['set-cookie']).toHaveLength(1)
-        expect(verifyResponse.headers['set-cookie'][0]).toMatch(new RegExp(`^${settings.jwtCookie}=.*; Max-Age=87400; Domain=${settings.rpId}; Path=/; Expires=.*; HttpOnly$`))
+        expect(verifyResponse.headers['set-cookie'][0]).toMatch(new RegExp(`^${settings.jwtCookie}=.*; Max-Age=87400; Domain=${settings.rpId}; Path=/; Expires=.*; HttpOnly; SameSite=Strict$`))
 
         expect(mockedInvitationRepo.findOneBy).toBeCalledWith({id: invitation.id})
         expect(mockedInvitationRepo.delete).toBeCalledWith(invitation.id)

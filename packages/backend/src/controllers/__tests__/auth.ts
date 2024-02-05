@@ -106,7 +106,7 @@ describe('authenticate', () => {
         // Assert
         expect(verifyResponse.statusCode).toBe(200)
         expect(verifyResponse.headers['set-cookie']).toHaveLength(1)
-        expect(verifyResponse.headers['set-cookie'][0]).toMatch(new RegExp(`^${settings.jwtCookie}=.*; Max-Age=87400; Domain=${settings.rpId}; Path=/; Expires=.*; HttpOnly$`))
+        expect(verifyResponse.headers['set-cookie'][0]).toMatch(new RegExp(`^${settings.jwtCookie}=.*; Max-Age=87400; Domain=${settings.rpId}; Path=/; Expires=.*; HttpOnly; SameSite=Strict$`))
 
         expect(mockedCredentialRepo.findOneBy).toBeCalledWith({credentialID})
         expect(mockedCredentialRepo.update).toBeCalledWith({ credentialID }, { counter: 0 })

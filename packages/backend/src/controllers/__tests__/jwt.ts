@@ -29,7 +29,7 @@ describe('JWT', () => {
         expect(mockedResponse.send).toHaveBeenCalledTimes(1)
         const cookieCall = mockedResponse.cookie.mock.calls[0] as object[]
         expect(cookieCall[0]).toEqual(settings.jwtCookie)
-        expect(cookieCall[2]).toEqual({maxAge: 87400000, httpOnly: true, secure: false, domain: 'localhost'})
+        expect(cookieCall[2]).toEqual({maxAge: 87400000, httpOnly: true, secure: false, domain: 'localhost', sameSite: 'strict'})
         const jwt = mockedResponse.cookie.mock.calls[0][1];
         expect(mockedResponse.send.mock.calls[0][0]).toEqual({jwt})
 
