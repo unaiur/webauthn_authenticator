@@ -44,16 +44,16 @@ export const RuleEntity = new EntitySchema<Rule>({
         type: "text",
         nullable: true,
         transformer: {
-          to: (value: string | null) => value ? new RegExp(value, 'i') : undefined,
-          from: (value: RegExp | undefined) => !value ? null : value.source,
+          from: (value: string | null) => value ? new RegExp(value, 'i') : undefined,
+          to: (value: RegExp | undefined) => !value ? null : value.source,
         }
       },
       pathRegex: {
         type: "text",
         nullable: true,
         transformer: {
-          to: (value: string | null) => value ? new RegExp(value) : undefined,
-          from: (value: RegExp | undefined) => !value ? null : value.source,
+          from: (value: string | null) => value ? new RegExp(value) : undefined,
+          to: (value: RegExp | undefined) => !value ? null : value.source,
         }
       },
   },

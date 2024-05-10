@@ -19,8 +19,16 @@ export async function initializeAuthProxy(app: Express, settings: Settings, audi
 
   async function reloadRules() {
     const newRules = await ruleRepo.find()
-    console.log(`${newRules.length} authorization rules reloaded`)
     newRules.sort((a, b) => a.position - b.position)
+    console.log(`${newRules.length} authorization rules reloaded:`)
+    for (const r of newRules) {
+      const conditions = []
+      if (!!r.hostRegex) conditions.push(`host match(${r.hostRegex.source})`)
+      if (!!r.pathRegex) conditions.push(`path match(${r.pathRegex.source})`)
+      if (!!r.roles) conditions.push(`role in(${r.roles.join(", ")})`)
+      const logic = conditions.length == 0 ? "always" : "when " + conditions.join(" and ")
+      console.log(`  #${r.position} ${r.name} (${r.id}) ${r.action} ${logic}`);
+    }
     rules = newRules
   }
 
