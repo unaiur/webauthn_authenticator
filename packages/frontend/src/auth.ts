@@ -44,8 +44,18 @@ async function authenticate() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  // Style body to center the button
+  document.body.style.margin = "0";
+  document.body.style.height = "100vh";
+  document.body.style.display = "flex";
+  document.body.style.justifyContent = "center";
+  document.body.style.alignItems = "center";
+
   const button = document.createElement("button");
   button.textContent = "Use PassKey";
+  button.style.width = "80%";
+  button.style.padding = "1rem";
+  button.style.fontSize = "1.5rem";
   button.addEventListener("click", authenticate);
   document.body.appendChild(button);
 });
