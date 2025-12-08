@@ -6,7 +6,7 @@ function appendFooter(text: string) {
   document.body.appendChild(footer);
 }
 
-document.addEventListener("DOMContentLoaded", (async () => {
+async function authenticate() {
   try {
     const optionsResponse = await fetch("options");
     const options = await optionsResponse.json();
@@ -41,4 +41,11 @@ document.addEventListener("DOMContentLoaded", (async () => {
   } catch (err) {
     console.error(err);
   }
-}) as EventListener);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const button = document.createElement("button");
+  button.textContent = "Use PassKey";
+  button.addEventListener("click", authenticate);
+  document.body.appendChild(button);
+});
